@@ -6,7 +6,6 @@ package ex1;
 import java.util.ArrayList;
 
 public class HashTable {
-    private boolean yaSobreEscrito = false;
     private int INITIAL_SIZE = 16;
     private int size ;
     private HashEntry[] entries = new HashEntry[INITIAL_SIZE];
@@ -19,40 +18,56 @@ public class HashTable {
         return this.INITIAL_SIZE;
     }
 
+    /**
+     * Fallaba al introducir un elemento con la misma key
+     *
+     * Solucionado
+     * @param key
+     * @param value
+     */
     public void put(String key, String value) {
+        boolean yaSobreEscrito = false;
         int hash = getHash(key);
         final HashEntry hashEntry = new HashEntry(key, value);// borra valors prev i next i don valor key, value
 
         if(entries[hash] == null ) {
             entries[hash] = hashEntry; // AQUI POSA VALOR  key, value A LA POSICIO hash (que es key) si esta buit
+            size++;
         }
         else {
             HashEntry temp = entries[hash];   // temporal guarda el dato que hi havia
             while(temp.next != null ) {
+                /**
+                 * Aqui mientras va avanzando para buscar el último elemento, voy comprobando que la key introducida
+                 * no sea de un elemento ya existente, de ser así, lo sobreescribe.
+                 * Y pongo un boleano para cuando llegue al último elemento no escriba nada, si ya sobreEscribió
+                 */
                 if (temp.key.equals(key)) {
                     temp.value = value;
                     yaSobreEscrito = true;
-                    size --;
+                    size++;
                 }
                 temp = temp.next;
             }
+            /**
+             * Aqui repito el mismo bucle anterior para que entre en el caso de que no haya colisiones
+             */
             if (temp.key.equals(key)) {
                 temp.value = value;
                 yaSobreEscrito = true;
-                size --;
+                size++;
             }
-        /**
-         * AQUI en este condicional verifico si el elemento anterior era la misma key que el valor insertado
-         * de ser así sobreescribe
+         /**
+         * AQUI entrara si no a sobreEscrito ningún elemento
          */
-
             if (!yaSobreEscrito){
                     temp.next = hashEntry;  // temporal buit igual key, value
                     hashEntry.prev = temp;  // guarda a previus el ultim valor que hi havia
+                size++;
                }
 
         }
-        size++;
+
     }
 
     /**

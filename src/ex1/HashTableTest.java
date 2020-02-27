@@ -16,15 +16,15 @@ class HashTableTest {
      */
     @org.junit.jupiter.api.Test
     void size() {
-//        for (int i = 0; i <5 ; i++) { // estos se sobreescrien luego
-//            hs.put(String.valueOf(i), "valor "+i);
-//        }
-//        assertEquals(5, hs.size());
-//        hs.put("0", "valor nuevo");
-//        assertEquals(5, hs.size());
+        for (int i = 0; i <50 ; i++) { // estos se sobreescrien luego
+            hs.put(String.valueOf(i), "valor "+i);
+        }
+        assertEquals(50, hs.size());
+        hs.put("0", "valor nuevo");
+        assertEquals(50, hs.size());
 
         for (int i = 0; i <50 ; i++) {
-            hs.put(String.valueOf(i), "valor "+i);
+            hs.put(String.valueOf(i), "Nuevo "+i);
         }
         assertEquals(50, hs.size());
 
@@ -66,7 +66,8 @@ class HashTableTest {
      * Tambien compruebo que si introduzco 100 valores, que ocupe las 16 posiciones del array
      *
      * FALLABA al escribir un elemento con la misma key, lo repetia
-     * ahora lo sobreescribe
+     *
+     * Solucionado: Ahora lo sobreescribe
      */
     @Test
     void put() {
@@ -74,7 +75,7 @@ class HashTableTest {
         hs.put("12","valor 1");
         assertEquals ("\n bucket[1] = [12, valor 1]", hs.toString());
 
-        // AQUI INTRODUZCO LA MISMA CLAVE Y NO FUNCIONA CORRECTAMENTE, YA QUE LO QUE HACE ES DUPLICAR EL ELEMENTO
+        // AQUI INTRODUZCO LA MISMA CLAVE Y NO FUNCIONABA CORRECTAMENTE, YA QUE LO QUE HACIA ERA DUPLICAR EL ELEMENTO
         hs.put("12","valor 2");
         assertEquals ("\n bucket[1] = [12, valor 2]", hs.toString());
 
@@ -99,13 +100,12 @@ class HashTableTest {
                 " bucket[1] = [12, valor 2]", hs.toString());
 
         /**
-         * Apartir de aqui compruebo si añade correctamente en todo el tamaño del array.
+         * Apartir de aqui compruebo si añade correctamente en xtodo el tamaño del array.
          *
          *      PRIMERO BORRO TODOS LOS DATOS PARA COMERZAR DE NUEVO
          */
 
         for (int i = 0; i < 34 ; i++) {
-            System.out.println("valor: " + i);
             hs.drop(String.valueOf(i));
         }
         assertEquals("", hs.toString());
@@ -118,7 +118,7 @@ class HashTableTest {
         for (int i = 0; i < 500 ; i++) {
             hs.put(String.valueOf(i), "Valor Nuevo: " + i);
         }
-        assertEquals("muchos muchos", hs.toString());
+      //  assertEquals("muchos muchos", hs.toString());
     }
 
 
@@ -137,8 +137,6 @@ class HashTableTest {
         /**
          * Aqui en la posición uno no hay elemento y devuelve correctamente null
          */
-        hs.put("","0");
-        System.out.println(hs);
         assertEquals(null, hs.get("1"));
 
     }
