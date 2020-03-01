@@ -10,10 +10,21 @@ public class HashTable {
     private int size ;
     private HashEntry[] entries = new HashEntry[INITIAL_SIZE];
 
+
+    /**
+     * Error: Devolvía siempre cero
+     * La variable no se incrementaba en ningún lado
+     * Solucionado
+     * @return
+     */
     public int size(){
         return this.size;
     }
 
+    /**
+     * Funciona correctamente
+     * @return
+     */
     public int realSize(){
         return this.INITIAL_SIZE;
     }
@@ -21,7 +32,7 @@ public class HashTable {
     /**
      * Fallaba al introducir un elemento con la misma key
      *
-     * Solucionado
+     * Solucionado: Ahora lo sobreEscribe
      * @param key
      * @param value
      */
@@ -45,7 +56,6 @@ public class HashTable {
                 if (temp.key.equals(key)) {
                     temp.value = value;
                     yaSobreEscrito = true;
-                    size++;
                 }
                 temp = temp.next;
             }
@@ -55,19 +65,16 @@ public class HashTable {
             if (temp.key.equals(key)) {
                 temp.value = value;
                 yaSobreEscrito = true;
+            }
+            /**
+             * AQUI entrara si no a sobreEscrito ningún elemento
+             */
+            if (!yaSobreEscrito){
+                temp.next = hashEntry;  // temporal buit igual key, value
+                hashEntry.prev = temp;  // guarda a previus el ultim valor que hi havia
                 size++;
             }
-         /**
-         * AQUI entrara si no a sobreEscrito ningún elemento
-         */
-            if (!yaSobreEscrito){
-                    temp.next = hashEntry;  // temporal buit igual key, value
-                    hashEntry.prev = temp;  // guarda a previus el ultim valor que hi havia
-                size++;
-               }
-
         }
-
     }
 
     /**
@@ -103,7 +110,7 @@ public class HashTable {
  * Entonces por mucho next que hiciera, nunca encontraba el elemento que quier borrar y daba Null pointer Exception
  *
  * En el caso de que el elemento que busco para borrar estuviera detras de otros elementos, entonces si que en el
- * while anterior va entrando y haciendo next buscando el elemento, y si no exite no hay problema .
+ * while anterior va entrando y haciendo next buscando el elemento, y si no existe no hay problema .
  *
  */
             if (temp.key.equals(key)) { // UFFF verifica key - si la key no existe se lo salta xtodo y no hace nada.

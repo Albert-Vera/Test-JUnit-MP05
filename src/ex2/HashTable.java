@@ -5,79 +5,112 @@ package ex2;
 
 import java.util.ArrayList;
 
-/**
- * Extracción de Clase en el main, lo saque a una Clase externa
- * Extracción de método en el Drop y Put();
- */
 public class HashTable {
     private int INITIAL_SIZE = 16;
     private int size ;
     private HashEntry[] entries = new HashEntry[INITIAL_SIZE];
 
+
+    /**
+     * Error: Devolvía siempre cero
+     * La variable no se incrementaba en ningún lado
+     * Solucionado
+     * @return Devuelve size
+     */
     public int size(){
         return this.size;
     }
 
+    /**
+     * Funciona correctamente
+     * @return Devuelve Real size
+     */
     public int realSize(){
         return this.INITIAL_SIZE;
     }
 
+
+    /**
+     * Fallaba al introducir un elemento con la misma key
+     *
+     * Solucionado: Ahora lo sobreEscribe
+     * @param key key
+     * @param value valor
+     */
     public void put(String key, String value) {
+        boolean yaSobreEscrito = false;
         int hash = getHash(key);
         final HashEntry hashEntry = new HashEntry(key, value);// borra valors prev i next i don valor key, value
 
-        if(entries[hash] == null) {
+        if(entries[hash] == null ) {
             entries[hash] = hashEntry; // AQUI POSA VALOR  key, value A LA POSICIO hash (que es key) si esta buit
+            size++;
         }
         else {
             HashEntry temp = entries[hash];   // temporal guarda el dato que hi havia
-            while(temp.next != null)
+            while(temp.next != null ) {
+                /**
+                 * Viendo el nombre del método es mas fácil de saber que hace que no pas viendo unas líneas de código
+                 *
+                 * */
+                yaSobreEscrito = sobreEscribirElemento(key, value, yaSobreEscrito, temp);
                 temp = temp.next;
+            }
             /**
-             * AQUI en este condicional verifico si el elemento anterior era la misma key que el valor insertado
-             * de ser así sobreescribe
+             * Aqui repito el mismo bucle anterior para que entre en el caso de que no haya colisiones
              */
-            if (temp.prev != null) {
-                if (temp.prev.key.equals(key)) {
-                    /**
-                     * Aqui deberia sobreEscribir primer elemento y dejar a las colisiones siguientes igual
-                     * De forma manual lo consigo, sí solo hay una colisión
-                     */
-                    entries[hash] = hashEntry;
-                    entries[hash].next = temp;
-                    size--;
-                }
-            }
-            if(key.equals(temp.key)){ // verifica si tienen la misma key para sobreEscribir
-                sobreEscribirElemento(hashEntry, temp);
-            }else {
-                añadeUnElemento(hashEntry, temp);
-            }
+            yaSobreEscrito = sobreEscribirElemento(key, value, yaSobreEscrito, temp);
+            /**
+             * AQUI entrara si no a sobreEscrito ningún elemento
+             */
+            añadeColision(yaSobreEscrito, hashEntry, temp);
         }
-        size++;
     }
 
     /**
-     * Extracción de método para de esta forma con el nombre del método ya se sabe que hace este código
-     * @param hashEntry
-     * @param temp
+     * Extracción de método
+     * Viendo el nombre del método es mas fácil de saber que hace que no pas viendo unas líneas de código
+     * Aqui solo entrará si no a sobreEscrito ningun elemento
+     * por tanto añade colisión nueva
+     *
+     * @param yaSobreEscrito booleano para saber si habia sobreEscrito o no
+     * @param hashEntry  Contiene el valor del elemento que introduce put()
+     * @param temp Esto es el hashentry con su hash
      */
-    private void añadeUnElemento(HashEntry hashEntry, HashEntry temp) {
-        temp.next = hashEntry;  // temporal buit igual key, value
-        hashEntry.prev = temp;  // guarda a previus el ultim valor que hi havia
+    private void añadeColision(boolean yaSobreEscrito, HashEntry hashEntry, HashEntry temp) {
+        if (!yaSobreEscrito){
+            temp.next = hashEntry;  // temporal buit igual key, value
+            hashEntry.prev = temp;  // guarda a previus el ultim valor que hi havia
+            size++;
+        }
     }
+
     /**
-     * Extracción de método para de esta forma con el nombre del método ya se sabe que hace este código
-     * @param hashEntry
+     * Extracción de método
+     * Primero que de esta forma con el nombre del método ya se sabe que hace el código
+     * y después es que se repetia dos veces
+     * Aqui mientras va avanzando para buscar el último elemento, voy comprobando que la key introducida
+     * no sea de un elemento ya existente, de ser así, lo sobreescribe.
+     * Y pongo un boleano para cuando llegue al último elemento no escriba nada, si ya sobreEscribió
+     *
+     * @param key
+     * @param value
+     * @param yaSobreEscrito booleano para saber si entro aquí o no entró
      * @param temp
+     * @return
      */
-    private void sobreEscribirElemento(HashEntry hashEntry, HashEntry temp) {
-        size --;    // al sobre escribir le resto elemento a size , por que luego se lo sumará
-        temp.value = hashEntry.value;    // si esta ocupat
+    private boolean sobreEscribirElemento(String key, String value, boolean yaSobreEscrito, HashEntry temp) {
+        if (temp.key.equals(key)) {
+            temp.value = value;
+            yaSobreEscrito = true;
+        }
+        return yaSobreEscrito;
     }
 
     /**
      * Returns 'null' if the element is not found.
+     *
+     * Este método funciona correctamente
      */
     public String get(String key) {
         int hash = getHash(key);
@@ -93,6 +126,14 @@ public class HashTable {
         return null;
     }
 
+
+    /**
+     * Errores encontrados:
+     *     -> Si borrabas primer elemento, lo borraba xtodo, colisiones incluidas
+     *     -> Si el elemento a borrar tenia un key mayor que colisiones anteriores daba NULl POINTER EXECEPTIONS
+     *
+     *          TODO solucionado
+     */
     public void drop(String key) {
         int hash = getHash(key);
         if(entries[hash] != null) {
@@ -100,51 +141,59 @@ public class HashTable {
             HashTable.HashEntry temp = entries[hash];
             while( (!temp.key.equals(key)) && (temp.next != null)) {
 
-                temp = temp.next;   // pasa al siguiente elemento, buscando la key
+                temp = temp.next;
             }
-/**
- * UFF  con el while anterior verificando el null o el if de acontinuación verificando la key
- * soluciono el tema que cuando borraba un elemento que ya habia sido borrado
- * Sucedia que el elemento siguiente tenia una key superior a la que estaba buscando para eliminar
- * Entonces por mucho next que hiciera, nunca encontraba el elemento que quier borrar y daba Null pointer Exception
- *
- * En el caso de que el elemento que busco para borrar estuviera detras de otros elementos, entonces si que en el
- * while anterior va entrando y haciendo next buscando el elemento, y si no exite no hay problema .
- *
- */
+            /**
+             * UFF  con el while anterior verificando el null o el if de acontinuación verificando la key
+             * soluciono el tema que cuando borraba un elemento que ya habia sido borrado
+             * Sucedia que el elemento siguiente tenia una key superior a la que estaba buscando para eliminar
+             * Entonces por mucho next que hiciera, nunca encontraba el elemento que quier borrar y daba Null pointer Exception
+             *
+             * En el caso de que el elemento que busco para borrar estuviera detras de otros elementos, entonces si que
+             * en el while anterior va entrando y haciendo next buscando el elemento, y si no existe no hay problema .
+             *
+             */
             if (temp.key.equals(key)) { // UFFF verifica key - si la key no existe se lo salta xtodo y no hace nada.
                 if (temp.prev == null) {
-                    borraPrimerElemento(hash);
-                } else borrarUnaColisión(temp);
+                    // Extración de método,
+                    eliminarPrimerElemento(hash);
+                } else {
+                    // Extracción de método
+                    eliminaColisión(temp);
+                }
             }
         }
     }
 
     /**
-     * Llamado por el método drop()
-     *  He extraido el código con Refactor -> Extraer método
-     *  De esta forma viendo el nombre del método ya se sabe que hace ese código
-     * @param temp variable temporal del hashEntry con los valores previus i next del hashEntry
+     * Extracción de método, se ve más claro con el nombre del método que hace este código
+     * @param temp
      */
-    private void borrarUnaColisión(HashEntry temp) {
+    private void eliminaColisión(HashEntry temp) {
         if (temp.next != null)
             temp.next.prev = temp.prev;   //esborrem temp, per tant actualitzem l'anterior al següent
         temp.prev.next = temp.next;                         //esborrem temp, per tant actualitzem el següent de l'anterior
     }
 
     /**
-     * Llamado por el método drop()
-     *  * Aqui no actuaba correctamente
-     *  Ahora en caso de ser el primer elemento lo borra dejando los siguientes
-     *  Lo he extraido a un método, de esta forma con el nombre del método ya se sabe lo que hace.
-     * @param temp variable temporal del hashEntry con los valores previus i next del hashEntry
+     * Extracción de método, se ve más claro con el nombre del método que hace este código
+     * @param hash
      */
-    private void borraPrimerElemento(int hash) {
+    private void eliminarPrimerElemento(int hash) {
+        /**
+         * Aqui no actuaba correctamente
+         * Ahora en caso de ser el primer elemento lo borra dejando los siguientes
+         */
         entries[hash] = entries[hash].next;  // AQUI al primer valor le doy el valor del siguiente
         if (entries[hash] != null)
             entries[hash].prev = null; // En caso de no haber siguiente pues hash borrado entero
     }
 
+    /**
+     * Obtiene el hash, funciona ok.
+     * @param key
+     * @return
+     */
     private int getHash(String key) {
         // piggy backing on java string
         // hashcode implementation.
@@ -259,10 +308,11 @@ public class HashTable {
 
         return  foundKeys;
     }
-
-/**
- *  Extracción de Clase
- *  Aqui había el main y con Refactor Delegate lo he extraido a una clase nueva
- *  Juntamante con el método Log que era Private
- */
+    /**
+     * Extracción de Clase con Delegate
+     * Lo extraje para separar los métodos del main
+     * De esta forma da mas claridad al código ya que el main no cuesta de encontrar
+     * Aqui había el main
+     *
+     */
 }

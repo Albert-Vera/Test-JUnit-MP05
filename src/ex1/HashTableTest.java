@@ -12,7 +12,7 @@ class HashTableTest {
      * Método size
      * No funcionaba, la variable size no se incrementaba en ningún lado
      *
-     * Contemple el error que si sobreescribe un elemento no aumenete el tamaño de size.
+     * Contemple el error que si sobreescribe un elemento no tiene que aumentar el tamaño de size.
      */
     @org.junit.jupiter.api.Test
     void size() {
@@ -20,18 +20,20 @@ class HashTableTest {
             hs.put(String.valueOf(i), "valor "+i);
         }
         assertEquals(50, hs.size());
+
+        // SobreEscribe y size es correcto
         hs.put("0", "valor nuevo");
         assertEquals(50, hs.size());
 
+        // SobreEscribe los mismos 50 de antes
         for (int i = 0; i <50 ; i++) {
             hs.put(String.valueOf(i), "Nuevo "+i);
         }
         assertEquals(50, hs.size());
 
-// TODO  raro funciona con 10 elementos pero no funciona con muchos mas
-        // AQUI introduzco key ya existente para verificar si el size es correcto
-        hs.put("0", "valorsa 0"); // no es correcto por que no sobreEscrie si hay muchas colisiones
-//        assertEquals(100, hs.size()); // Los primeros 10 del 1º bucle se sobreescriben
+       //  AQUI introduzco key ya existente para verificar si el size sigue siendo correcto
+        hs.put("0", "valorsa 0");
+        assertEquals(50, hs.size());
         assertEquals("", hs.toString());
     }
 
@@ -79,7 +81,7 @@ class HashTableTest {
         hs.put("12","valor 2");
         assertEquals ("\n bucket[1] = [12, valor 2]", hs.toString());
 
-        //Colisión en posición "1"
+        //Colisión en posición "0"
         hs.put("0","Cosa A");
         assertEquals ("\n bucket[0] = [0, Cosa A]\n" +
                 " bucket[1] = [12, valor 2]", hs.toString());
@@ -114,6 +116,7 @@ class HashTableTest {
          * AQUI INSERTO VALORES PARA COMPROBAR TAMAÑO ARRAY
          * Va haciendo colisiones
          * Lo hace correctamente
+         * Omito el assertEquals por que el array es enorme
          */
         for (int i = 0; i < 500 ; i++) {
             hs.put(String.valueOf(i), "Valor Nuevo: " + i);
@@ -129,22 +132,27 @@ class HashTableTest {
     @org.junit.jupiter.api.Test
     void get() {
 
-        /**         *  Aqui introduzco un dato y verifica que el método get devuelve el valor correcto
+        /**    Aqui introduzco un dato y acontinuación lo borro y verifico
+         *  que el método get devuelve el valor correcto
          */
         hs.put("0","0");
         assertEquals("0", hs.get("0"));
+        hs.drop("0"); // borrandolo
 
         /**
-         * Aqui en la posición uno no hay elemento y devuelve correctamente null
+         * Aqui en la posición cero no hay elemento y devuelve correctamente null
          */
-        assertEquals(null, hs.get("1"));
+        assertEquals(null, hs.get("0"));
+
+        //Aqui le pido un elemento que no existe y devuelve null correctamente
+        assertEquals(null, hs.get("11"));
 
     }
 
 
     /**
      * Errores encontrados:
-     *     -> Si borrabas primer elemento, lo borraba todo, colisiones incluidas
+     *     -> Si borrabas primer elemento, lo borraba xtodo, colisiones incluidas
      *     -> Si el elemento a borrar tenia un key mayor que colisiones anteriores daba NULl POINTER EXECEPTIONS
      *
      *          TODO solucionado
@@ -197,8 +205,10 @@ class HashTableTest {
 
         // Borrar uno que no existe...habiendo otros destras (colisiones) SOLUCIONADO
         hs.put("33","prueba 33");
+        hs.put("55", "prueba 55");
         hs.drop("44");
-        assertEquals("\n bucket[0] = [22, Cosa C] -> [33, prueba 33]\n bucket[1] = [12, valor 1] -> [1, valor 2]\n"
+        hs.drop("66");
+        assertEquals("\n bucket[0] = [22, Cosa C] -> [33, prueba 33] -> [55, prueba 55]\n bucket[1] = [12, valor 1] -> [1, valor 2]\n"
                 + " bucket[3] = [3, Cosa 3]",hs.toString());
     }
 }
